@@ -1,0 +1,39 @@
+@page "/EmailEditor"
+@inject IJSRuntime JS
+
+<h3>Editor de Plantillas de Correo</h3>
+
+<div id="editor" style="height: 800px;"></div>
+
+<button class="btn btn-primary mt-3" @onclick="ExportHtml">
+    Exportar HTML
+</button>
+
+@if (!string.IsNullOrEmpty(ExportedHtml))
+{
+    <h5 class="mt-4">HTML Exportado:</h5>
+    <div style="white-space: pre-wrap; background-color: #f8f9fa; padding: 10px; border-radius: 5px;">
+        @ExportedHtml
+    </div>
+}
+
+@code {
+    private string? ExportedHtml;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await JS.InvokeVoidAsync("initializeUnlayerEditor");
+        }
+    }
+
+    private async Task ExportHtml()
+    {
+        var html = await JS.InvokeAsync<string>("exportEmailHtml");
+        ExportedHtml = html;
+
+        await JS.InvokeVoidAsync("downloadHtmlFile", "plantilla-daymail.html", html);
+    }
+
+}
